@@ -1,0 +1,39 @@
+# Taps one call button on the FRND Connect (PTR) screen, accepts the rules dialog,
+# screenshots the screen it opens, then backs out to the Connect screen.
+# Params (env): BTN = button label regex, SHOT = screenshot name
+appId: com.dating.for.all.debug
+---
+- tapOn:
+    text: ${BTN}
+    waitToSettleTimeoutMs: 500
+- waitForAnimationToEnd:
+    timeout: 3000
+# "Attention! Join FRND Connects and talk respectfully..." rules dialog
+- runFlow:
+    when:
+      visible: "I Agree"
+    commands:
+      - tapOn:
+          text: "I Agree"
+          waitToSettleTimeoutMs: 500
+          optional: true
+- runFlow: allow_notifications.yaml        # mic / camera permission if not pre-granted
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${SHOT}
+# Back out (matching / call screens may ask to confirm leaving)
+- repeat:
+    while:
+      notVisible:
+        text: "Recents"
+    times: 4
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - tapOn:
+          text: "(?i)(yes|leave|exit|end|ok)"
+          optional: true
+          waitToSettleTimeoutMs: 300
+- assertVisible:
+    text: "Recents"

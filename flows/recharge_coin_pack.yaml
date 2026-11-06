@@ -1,0 +1,89 @@
+# Recharge: buy the 19-coin pack (Rs 4) through the Cashfree test gateway and check coins are credited.
+# Recorded manually 6 Nov 2026 (recordings/02_ptr_and_recharge, steps 26-41).
+# Cashfree QA simulator: OTP 111000, Simulation Status SUCCESS, Submit.
+# Run:  .\run.ps1 flows\recharge_coin_pack.yaml -Device <serial> -Phone 78901xxxxx
+appId: com.dating.for.all.debug
+name: Recharge 19 coins via Cashfree test payment
+tags:
+  - recharge
+  - payment
+---
+- startRecording: recharge_coin_pack
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+
+# Coin balance before
+- copyTextFrom:
+    id: "coinAmount"
+- evalScript: "${output.coinsBefore = parseInt(maestro.copiedText.replace(/[^0-9]/g, ''))}"
+- evalScript: "${console.log('Coins before: ' + output.coinsBefore)}"
+# Coin balance chip -> Coin Pack
+- tapOn:
+    id: "coinAmount"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Coin Pack"
+    timeout: 20000
+- takeScreenshot: recharge_1_coin_pack
+- tapOn:
+    text: "19"
+    waitToSettleTimeoutMs: 500
+
+# Payment options -> GPay (routes to the Cashfree simulator on QA)
+- extendedWaitUntil:
+    visible: "Final Amount"
+    timeout: 20000
+- takeScreenshot: recharge_2_payment
+- tapOn:
+    text: "GPay"
+    waitToSettleTimeoutMs: 500
+
+# Cashfree "Complete Transaction" simulator page (WebView)
+- extendedWaitUntil:
+    visible: "Complete Transaction"
+    timeout: 45000
+# OTP box is an unlabelled WebView input between the "OTP" label and "Simulation Status"
+- repeat:
+    while:
+      notVisible: "111000"
+    times: 3
+    commands:
+      - tapOn:
+          below:
+            text: "OTP"
+          above:
+            text: "Simulation Status"
+          waitToSettleTimeoutMs: 500
+      - eraseText: 10
+      - inputText: "111000"
+- hideKeyboard
+# WebView labels are styled uppercase - match case-insensitively
+- tapOn:
+    text: "(?i)\\s*success\\s*"
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    text: "(?i)\\s*submit\\s*"
+    waitToSettleTimeoutMs: 500
+
+# Result
+- extendedWaitUntil:
+    visible: "Payment Successful"
+    timeout: 60000
+- takeScreenshot: recharge_3_success
+- tapOn:
+    text: "Okay"
+    waitToSettleTimeoutMs: 500
+
+# Coins credited (+19)
+- extendedWaitUntil:
+    visible:
+      id: "coinAmount"
+    timeout: 20000
+- copyTextFrom:
+    id: "coinAmount"
+- evalScript: "${output.coinsAfter = parseInt(maestro.copiedText.replace(/[^0-9]/g, ''))}"
+- evalScript: "${console.log('Coins after: ' + output.coinsAfter)}"
+- assertTrue:
+    condition: "${output.coinsAfter >= output.coinsBefore + 19}"
+    label: "19 coins credited"
+- stopRecording

@@ -1,0 +1,22 @@
+# FRND Connect (PTR) screen: tap Audio, Video and Antakshari, check each opens, come back.
+# Recorded manually 6 Nov 2026 (recordings/02_ptr_and_recharge, steps 27-31, 42-48).
+# Run:  .\run.ps1 flows\connect_screen_buttons.yaml -Device <serial> -Phone 78901xxxxx
+appId: com.dating.for.all.debug
+name: Connect screen buttons open
+tags:
+  - connect
+---
+- startRecording: connect_screen_buttons
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+- tapOn:
+    text: "Connect"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Audio"
+    timeout: 20000
+- takeScreenshot: connect_0_screen
+- runFlow: { file: subflows/connect_button.yaml, env: { BTN: "Audio",       SHOT: "connect_1_audio" } }
+- runFlow: { file: subflows/connect_button.yaml, env: { BTN: "Video",       SHOT: "connect_2_video" } }
+- runFlow: { file: subflows/connect_button.yaml, env: { BTN: "Antakshari.*", SHOT: "connect_3_antakshari" } }
+- stopRecording
