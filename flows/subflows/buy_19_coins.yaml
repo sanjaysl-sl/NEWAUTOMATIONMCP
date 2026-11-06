@@ -1,0 +1,54 @@
+# From any screen with the coin balance chip: Coin Pack -> 19 coins (Rs 4) -> GPay -> Cashfree simulator.
+# Params (env): STATUS = SUCCESS | FAILED | PENDING | USER_DROPPED  (Cashfree QA simulator response)
+# Cashfree QA simulator: OTP 111000, pick the Simulation Status, Submit.
+appId: com.dating.for.all.debug
+---
+- tapOn:
+    id: "coinAmount"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Coin Pack"
+    timeout: 20000
+- tapOn:
+    text: "19"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Final Amount"
+    timeout: 20000
+- takeScreenshot: pay_1_options
+- tapOn:
+    text: "GPay"
+    waitToSettleTimeoutMs: 500
+
+# Cashfree "Complete Transaction" simulator page (WebView)
+- extendedWaitUntil:
+    visible: "Simulation Status"
+    timeout: 45000
+- waitForAnimationToEnd:
+    timeout: 2000
+# OTP box: unlabelled WebView input between the "OTP" label and "Simulation Status"
+- tapOn:
+    below:
+      text: "OTP"
+    above:
+      text: "Simulation Status"
+    waitToSettleTimeoutMs: 500
+- inputText: "111000"
+- takeScreenshot: pay_2_otp
+# Close the keyboard by tapping a neutral label (hideKeyboard sends BACK, which can leave the page)
+- tapOn:
+    text: "Simulation Status"
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    text: "(?i)\\s*${STATUS}\\s*"
+    waitToSettleTimeoutMs: 500
+    retryTapIfNoChange: false
+- takeScreenshot: pay_3_status
+# Single tap only: Maestro's auto re-tap resubmits the simulator form and it resets
+- tapOn:
+    text: "(?i)\\s*submit\\s*"
+    waitToSettleTimeoutMs: 500
+    retryTapIfNoChange: false
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: pay_4_submitted

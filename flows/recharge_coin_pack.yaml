@@ -1,9 +1,9 @@
-# Recharge: buy the 19-coin pack (Rs 4) through the Cashfree test gateway and check coins are credited.
+# Recharge success: buy the 19-coin pack (Rs 4) via the Cashfree test gateway (SUCCESS)
+# and check the coins are credited.
 # Recorded manually 6 Nov 2026 (recordings/02_ptr_and_recharge, steps 26-41).
-# Cashfree QA simulator: OTP 111000, Simulation Status SUCCESS, Submit.
 # Run:  .\run.ps1 flows\recharge_coin_pack.yaml -Device <serial> -Phone 78901xxxxx
 appId: com.dating.for.all.debug
-name: Recharge 19 coins via Cashfree test payment
+name: Recharge 19 coins - payment success
 tags:
   - recharge
   - payment
@@ -17,61 +17,19 @@ tags:
     id: "coinAmount"
 - evalScript: "${output.coinsBefore = parseInt(maestro.copiedText.replace(/[^0-9]/g, ''))}"
 - evalScript: "${console.log('Coins before: ' + output.coinsBefore)}"
-# Coin balance chip -> Coin Pack
-- tapOn:
-    id: "coinAmount"
-    waitToSettleTimeoutMs: 500
-- extendedWaitUntil:
-    visible: "Coin Pack"
-    timeout: 20000
-- takeScreenshot: recharge_1_coin_pack
-- tapOn:
-    text: "19"
-    waitToSettleTimeoutMs: 500
 
-# Payment options -> GPay (routes to the Cashfree simulator on QA)
-- extendedWaitUntil:
-    visible: "Final Amount"
-    timeout: 20000
-- takeScreenshot: recharge_2_payment
-- tapOn:
-    text: "GPay"
-    waitToSettleTimeoutMs: 500
+- runFlow:
+    file: subflows/buy_19_coins.yaml
+    env:
+      STATUS: "SUCCESS"
 
-# Cashfree "Complete Transaction" simulator page (WebView)
-- extendedWaitUntil:
-    visible: "Complete Transaction"
-    timeout: 45000
-# OTP box is an unlabelled WebView input between the "OTP" label and "Simulation Status"
-- repeat:
-    while:
-      notVisible: "111000"
-    times: 3
-    commands:
-      - tapOn:
-          below:
-            text: "OTP"
-          above:
-            text: "Simulation Status"
-          waitToSettleTimeoutMs: 500
-      - eraseText: 10
-      - inputText: "111000"
-- hideKeyboard
-# WebView labels are styled uppercase - match case-insensitively
-- tapOn:
-    text: "(?i)\\s*success\\s*"
-    waitToSettleTimeoutMs: 500
-- tapOn:
-    text: "(?i)\\s*submit\\s*"
-    waitToSettleTimeoutMs: 500
-
-# Result
 - extendedWaitUntil:
     visible: "Payment Successful"
     timeout: 60000
-- takeScreenshot: recharge_3_success
+- assertVisible: "19"                  # "Coin credited 19"
+- takeScreenshot: recharge_success
 - tapOn:
-    text: "Okay"
+    text: "(?i)okay"
     waitToSettleTimeoutMs: 500
 
 # Coins credited (+19)

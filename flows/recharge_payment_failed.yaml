@@ -1,0 +1,58 @@
+# Recharge failure + Try Again: Cashfree test gateway returns FAILED -> app shows "Payment Failed"
+# -> no coins credited -> "Try Again" goes back to the payment options.
+# Recorded manually 6 Nov 2026 (recordings/02_ptr_and_recharge, steps 15-24).
+# Run:  .\run.ps1 flows\recharge_payment_failed.yaml -Device <serial> -Phone 78901xxxxx
+appId: com.dating.for.all.debug
+name: Recharge 19 coins - payment failed and Try Again
+tags:
+  - recharge
+  - payment
+---
+- startRecording: recharge_payment_failed
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+
+- copyTextFrom:
+    id: "coinAmount"
+- evalScript: "${output.coinsBefore = parseInt(maestro.copiedText.replace(/[^0-9]/g, ''))}"
+
+- runFlow:
+    file: subflows/buy_19_coins.yaml
+    env:
+      STATUS: "FAILED"
+
+- extendedWaitUntil:
+    visible: "Payment Failed"
+    timeout: 60000
+- assertVisible: "Try Again"
+- assertVisible: "Help Center"
+- takeScreenshot: recharge_failed
+- tapOn:
+    text: "Try Again"
+    waitToSettleTimeoutMs: 500
+# Try Again returns to the payment options for the same pack
+- extendedWaitUntil:
+    visible: "Final Amount|Coin Pack"
+    timeout: 20000
+- takeScreenshot: recharge_try_again
+# Back to the app: no coins credited for the failed payment
+- repeat:
+    while:
+      notVisible:
+        id: "coinAmount"
+    times: 4
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - tapOn:
+          text: "(?i)(yes|no, cancel)"
+          optional: true
+          waitToSettleTimeoutMs: 300
+- copyTextFrom:
+    id: "coinAmount"
+- evalScript: "${output.coinsAfter = parseInt(maestro.copiedText.replace(/[^0-9]/g, ''))}"
+- assertTrue:
+    condition: "${output.coinsAfter == output.coinsBefore}"
+    label: "No coins credited for failed payment"
+- stopRecording
