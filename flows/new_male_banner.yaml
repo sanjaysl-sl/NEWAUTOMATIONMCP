@@ -1,0 +1,57 @@
+# New male user: home shows the "#Star Experts are LIVE! - Call Now" banner, and
+# FRND Connect -> Random -> Audio Call opens the "Add coins to play now" first-recharge offer.
+# Same checks for signup (new number) and sign-in (existing number) - see tools\run_new_male_banner.ps1.
+# Recorded manually 6 Nov 2026 (recordings/03_new_male_signup_banner).
+# Run:  .\run.ps1 flows\new_male_banner.yaml -Device <serial>                    (signup)
+#       .\run.ps1 flows\new_male_banner.yaml -Device <serial> -Phone 78901xxxxx  (sign-in)
+appId: com.dating.for.all.debug
+name: New male - Experts LIVE banner and first-recharge offer
+tags:
+  - new-male
+  - banner
+---
+- startRecording: new_male_banner
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml        # new number -> signup as "I am Boy"
+
+# Home banner (top carousel also rotates Diwali / Card Games banners, so wait for it)
+- extendedWaitUntil:
+    visible: ".*Experts are LIVE.*"
+    timeout: 30000
+- assertVisible: "(?i)call now"
+- takeScreenshot: banner_1_experts_live
+
+# FRND Connect -> Random -> Select call type -> Audio Call -> first-recharge offer
+- tapOn:
+    text: "Random.*"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Select call type"
+    timeout: 15000
+- takeScreenshot: banner_2_call_type
+- tapOn:
+    text: "Audio Call"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Add coins to wallet"
+    timeout: 20000
+- assertVisible: "Pay On App"
+- takeScreenshot: banner_3_add_coins_offer
+
+# Back to home, banner still shown
+- repeat:
+    while:
+      notVisible:
+        id: "homeTopBarRoot"
+    times: 4
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - tapOn:
+          text: "(?i)(yes|no, cancel)"
+          optional: true
+          waitToSettleTimeoutMs: 300
+- assertVisible:
+    id: "homeTopBarRoot"
+- stopRecording
