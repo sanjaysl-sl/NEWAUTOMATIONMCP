@@ -1,0 +1,18 @@
+# Selects QA, logs in (or signs up) with a 78901 number, lands on home.
+# Run:  .\run.ps1 flows\login_or_signup_check.yaml                 (new random number -> signup)
+#       .\run.ps1 flows\login_or_signup_check.yaml -Phone 78901xxxxx (existing number -> login)
+appId: com.dating.for.all.debug
+name: Login or signup reaches home
+tags:
+  - login
+---
+# No launchApp here: run.ps1 clears data + launches the app via adb (device workaround)
+- startRecording: login_or_signup
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+- assertVisible:
+    id: "homeTopBarRoot"
+- assertVisible:
+    id: "coinAmount"
+- takeScreenshot: login_or_signup_home
+- stopRecording

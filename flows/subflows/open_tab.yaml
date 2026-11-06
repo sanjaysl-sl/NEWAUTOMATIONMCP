@@ -1,0 +1,40 @@
+# Opens one bottom-navigation tab (if this build/user has it), checks it loaded, screenshots it.
+# Params (env): TAB = tab label regex, SHOT = screenshot name
+# The tab set is server-driven (5 Nov: Home/Connect/Forums/Live/FRND C../Recents/Circle;
+# 6 Nov: Home/Connect/Circle/FRND Chat/Recents), so missing tabs are skipped, not failed.
+# Some tabs (Forums) open full-screen and hide the bottom bar - press Back once to return.
+appId: com.dating.for.all.debug
+---
+- runFlow:
+    when:
+      notVisible:
+        text: "Recents"
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 1500
+- runFlow:
+    when:
+      visible:
+        text: ${TAB}
+    commands:
+      - tapOn:
+          text: ${TAB}
+          waitToSettleTimeoutMs: 500
+      - runFlow: home_popups.yaml          # tab-specific intro popups / permission dialogs
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - retry:                             # screencap can return null while the Home video renders
+          maxRetries: 3
+          commands:
+            - takeScreenshot: ${SHOT}
+      - runFlow:
+          when:
+            notVisible:
+              text: "Recents"
+          commands:
+            - back
+            - waitForAnimationToEnd:
+                timeout: 1500
+      - assertVisible:                     # app still open, bottom bar back = tab didn't crash
+          text: "Recents"

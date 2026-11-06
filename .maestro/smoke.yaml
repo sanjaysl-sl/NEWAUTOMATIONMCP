@@ -1,0 +1,30 @@
+appId: com.dating.for.all.debug
+name: Smoke - app launches to login screen
+tags:
+  - smoke
+---
+# Fresh start so we always land on the logged-out login screen
+- launchApp:
+    clearState: true
+    stopApp: true
+
+# App opens on a blank white window, then shows the splash image
+- extendedWaitUntil:
+    visible:
+      id: "com.dating.for.all.debug:id/appCompatImageView3"
+    timeout: 30000
+
+# Phone login screen with the onboarding carousel (replaces the splash).
+# Long timeout: startup is slow on emulators without a reachable backend.
+- extendedWaitUntil:
+    visible:
+      id: "com.dating.for.all.debug:id/phoneLoginRoot"
+    timeout: 90000
+- assertVisible:
+    id: "com.dating.for.all.debug:id/frndIv"
+- assertVisible:
+    id: "com.dating.for.all.debug:id/titleTv"
+- assertVisible:
+    id: "com.dating.for.all.debug:id/bottomLayoutHolder"
+
+- takeScreenshot: smoke_first_screen

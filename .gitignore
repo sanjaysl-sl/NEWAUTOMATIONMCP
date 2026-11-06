@@ -1,0 +1,11 @@
+﻿# Run output (large, regenerated every run)
+reports/*/
+reports/pdf/*.html
+recordings/*/*.png
+recordings/*/STOP
+# Maestro driver APKs extracted from the CLI by run.ps1
+.maestro/driver/
+# Local tooling / screenshots
+.claude/settings.local.json
+*.png
+!docs/**/*.png

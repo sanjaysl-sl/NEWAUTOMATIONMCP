@@ -1,0 +1,12 @@
+# Grants whichever Android runtime-permission dialog is showing (notifications, location, mic, ...).
+# Always picks the "allow" option: Allow / While using the app. One combined check keeps it fast.
+appId: com.dating.for.all.debug
+---
+- runFlow:
+    when:
+      visible:
+        id: "com.android.permissioncontroller:id/permission_allow(_foreground_only)?_button"
+    commands:
+      - tapOn:
+          id: "com.android.permissioncontroller:id/permission_allow(_foreground_only)?_button"
+          waitToSettleTimeoutMs: 300

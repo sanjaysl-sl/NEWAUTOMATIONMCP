@@ -1,0 +1,39 @@
+# Opens the debug menu (Volume Down) on the phone-login / phone-number screen and selects the QA server.
+appId: com.dating.for.all.debug
+---
+- extendedWaitUntil:
+    visible:
+      id: "com.dating.for.all.debug:id/phoneLoginRoot"
+    timeout: 90000
+# The notification permission dialog can pop up at any time on a fresh install and
+# swallow the Volume Down press, so retry until the debug menu is actually open.
+- repeat:
+    while:
+      notVisible: "Select server"
+    times: 5
+    commands:
+      - runFlow: allow_notifications.yaml
+      - pressKey: Volume down
+      - extendedWaitUntil:
+          visible: "Select server"
+          timeout: 4000
+          optional: true
+- tapOn:
+    text: "Select server"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "QA"
+    timeout: 10000
+- tapOn:
+    text: "QA"
+    waitToSettleTimeoutMs: 500
+# Confirm QA is the selected environment: the radio button left of "QA" must be checked
+- assertVisible:
+    checked: true
+    leftOf: "QA"
+- tapOn:
+    text: "Ok"
+    waitToSettleTimeoutMs: 500
+- runFlow: allow_notifications.yaml
+- assertVisible:
+    id: "com.dating.for.all.debug:id/phoneLoginRoot"

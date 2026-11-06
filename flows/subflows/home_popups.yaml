@@ -1,0 +1,51 @@
+# Dismisses popups that can cover the home screen. Every step is conditional.
+# Taps use a short waitToSettleTimeoutMs: the Streaks video keeps the screen "moving",
+# and without it each tap waits ~13 s for the UI to settle.
+appId: com.dating.for.all.debug
+---
+- runFlow: allow_notifications.yaml
+# Streaks intro video sheet: "Okay, understood" shows once the video finishes
+- runFlow:
+    when:
+      visible:
+        id: ".*exo_overlay"
+    commands:
+      - extendedWaitUntil:
+          visible: "Okay, understood"
+          timeout: 40000
+      - tapOn:
+          text: "Okay, understood"
+          waitToSettleTimeoutMs: 300
+          optional: true
+# Daily streak reward
+- runFlow:
+    when:
+      visible: "CLAIM NOW"
+    commands:
+      - tapOn:
+          text: "CLAIM NOW"
+          waitToSettleTimeoutMs: 300
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "badgeEarnedPostClaimTryLaterText"
+          timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: "badgeEarnedPostClaimTryLaterText"
+    commands:
+      - tapOn:
+          id: "badgeEarnedPostClaimTryLaterText"
+          waitToSettleTimeoutMs: 300
+          optional: true
+- runFlow: allow_notifications.yaml
+# Chat Bubbles prompt
+- runFlow:
+    when:
+      visible: "NOT NOW"
+    commands:
+      - tapOn:
+          text: "NOT NOW"
+          waitToSettleTimeoutMs: 300
+          optional: true

@@ -1,0 +1,12 @@
+# Workspace config for `maestro test .maestro/`
+# Only these flows are executed when running the whole folder.
+flows:
+  - "*.yaml"
+  - "flows/**/*.yaml"
+
+# Uncomment to run only smoke-tagged flows by default:
+# includeTags:
+#   - smoke
+
+executionOrder:
+  continueOnFailure: true

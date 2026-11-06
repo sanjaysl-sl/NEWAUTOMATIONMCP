@@ -1,0 +1,17 @@
+﻿# case=01_frnd_c_tab device=77478578 started=2026-11-06T12:16:32
+step=1 kind=tap from=(546,1609) to=(546,1609) ms=24 nav=BACK note='system nav BACK'
+step=2 kind=tap from=(130,1475) to=(130,1475) ms=3 nav= note='no snapshot'
+step=3 kind=tap from=(268,1475) to=(268,1475) ms=1 nav= note='no snapshot'
+step=4 kind=tap from=(360,1469) to=(360,1469) ms=0 nav= note='no snapshot'
+step=5 kind=tap from=(581,1602) to=(581,1602) ms=0 nav=BACK note='system nav BACK'
+step=6 kind=tap from=(345,1059) to=(345,1059) ms=1 nav= note='no snapshot'
+step=7 kind=tap from=(382,1476) to=(382,1476) ms=0 nav= note='no snapshot'
+step=8 kind=tap from=(541,1616) to=(541,1616) ms=0 nav=BACK note='system nav BACK'
+step=9 kind=tap from=(384,1055) to=(384,1055) ms=1 nav= note='no snapshot'
+step=10 kind=tap from=(487,1481) to=(493,1485) ms=8 nav= note='no snapshot'
+step=11 kind=tap from=(508,1202) to=(508,1202) ms=3 nav= note='no snapshot'
+step=12 kind=tap from=(615,1471) to=(615,1471) ms=0 nav= note='no snapshot'
+step=13 kind=tap from=(119,1484) to=(119,1484) ms=1 nav= note='no snapshot'
+step=14 kind=tap from=(18,137) to=(18,137) ms=0 nav= note='no snapshot'
+step=15 kind=swipe from=(361,729) to=(73,767) ms=9 nav= note='no snapshot'
+# stopped=2026-11-06T12:17:04 steps=15

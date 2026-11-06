@@ -1,0 +1,110 @@
+# Phone login with a 78901XXXXX test number + OTP 123456.
+# Existing number -> home. New number -> signup subflow -> home.
+# Pass -e PHONE=78901xxxxx to reuse a number; otherwise a random one is generated.
+appId: com.dating.for.all.debug
+---
+- evalScript: "${output.phone = (typeof PHONE !== 'undefined' && PHONE) ? String(PHONE) : '78901' + Math.floor(10000 + Math.random() * 90000)}"
+- evalScript: "${console.log('Using phone ' + output.phone)}"
+
+- runFlow:            # "Let's Go" (skipped if run.ps1 -SkipOnboarding already tapped it)
+    when:
+      visible:
+        id: "com.dating.for.all.debug:id/join"
+    commands:
+      - tapOn:
+          id: "com.dating.for.all.debug:id/join"
+          waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible:
+      id: "com.dating.for.all.debug:id/numberEt"
+    timeout: 20000
+- tapOn:
+    id: "com.dating.for.all.debug:id/numberEt"
+    waitToSettleTimeoutMs: 500
+# Paste instead of inputText; the field still sometimes drops a digit (Redmi A4),
+# so re-enter until it shows exactly the generated number.
+- setClipboard: ${output.phone}
+- repeat:
+    while:
+      notVisible:
+        id: "com.dating.for.all.debug:id/numberEt"
+        text: ${output.phone}
+    times: 4
+    commands:
+      - eraseText: 15
+      - pasteText
+      - waitForAnimationToEnd:
+          timeout: 1000
+- assertVisible:
+    id: "com.dating.for.all.debug:id/numberEt"
+    text: ${output.phone}
+- tapOn:
+    id: "com.dating.for.all.debug:id/getOtp"
+    waitToSettleTimeoutMs: 500
+
+- extendedWaitUntil:
+    visible:
+      id: "com.dating.for.all.debug:id/otpEt"
+    timeout: 60000
+- tapOn:
+    id: "com.dating.for.all.debug:id/otpEt"
+    waitToSettleTimeoutMs: 500
+- setClipboard: "123456"       # OTP auto-submits after 6 digits
+- pasteText
+
+# Branch: signup form (new number) or home (existing number)
+# Home can be hidden behind a dialog (Chat Bubbles, Streaks video), so clear popups while waiting.
+- repeat:
+    while:
+      notVisible:
+        id: "nicknameTextField|homeTopBarRoot"
+    times: 15
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "nicknameTextField|homeTopBarRoot|.*exo_overlay"
+          timeout: 4000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "nicknameTextField"
+          file: home_popups.yaml
+- runFlow: allow_notifications.yaml
+- runFlow:
+    when:
+      visible:
+        id: "nicknameTextField"
+    file: signup.yaml
+
+# --- Reach home: permission dialogs, the app-language screen, the Streaks video and reward
+# popups can appear in any order (and a dialog hides the screen under it), so loop until
+# home is visible with nothing on top. ---
+- repeat:
+    while:
+      notVisible:
+        id: "homeTopBarRoot"
+    times: 20
+    commands:
+      - runFlow: allow_notifications.yaml
+      - runFlow:
+          when:
+            visible:
+              id: "btnSetAppLanguage"
+          commands:
+            - tapOn:
+                text: "English"
+                optional: true
+                waitToSettleTimeoutMs: 500
+            - tapOn:
+                id: "btnSetAppLanguage"
+                waitToSettleTimeoutMs: 500
+      - runFlow: home_popups.yaml
+      - extendedWaitUntil:
+          visible:
+            id: "homeTopBarRoot"
+          timeout: 3000
+          optional: true
+- runFlow: home_popups.yaml
+- assertVisible:
+    id: "homeTopBarRoot"

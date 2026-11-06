@@ -1,0 +1,23 @@
+# Logs in on QA (or signs up a new number), then opens every bottom-navigation tab and comes back home.
+# Run:  .\run.ps1 flows\bottom_navigation.yaml -Phone 78901xxxxx   (existing account -> faster)
+#       .\run.ps1 flows\bottom_navigation.yaml                     (new account via signup)
+appId: com.dating.for.all.debug
+name: Bottom navigation tabs open
+tags:
+  - navigation
+---
+- startRecording: bottom_navigation
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Connect",   SHOT: "tab_connect" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Forums",    SHOT: "tab_forums" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Live",      SHOT: "tab_live" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "FRND Ch.*",  SHOT: "tab_frnd_chat" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Recents",   SHOT: "tab_recents" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Circle",    SHOT: "tab_circle" } }
+- runFlow: { file: subflows/open_tab.yaml, env: { TAB: "Home",      SHOT: "tab_home" } }
+
+- assertVisible:
+    id: "homeTopBarRoot"
+- stopRecording
