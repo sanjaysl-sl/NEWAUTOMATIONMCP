@@ -1,0 +1,20 @@
+# In a FRND Connect call as host: wait until a FRND has joined, tap their avatar,
+# and wait for the "FRND Safety Centre" sheet (Remove / Report / Block).
+appId: com.dating.for.all.debug
+---
+- extendedWaitUntil:                       # joined user shows a Follow / Following chip
+    visible: ".*Follow.*"
+    timeout: 180000
+- repeat:
+    while:
+      notVisible: "FRND Safety Centre"
+    times: 4
+    commands:
+      - tapOn:
+          point: "80%,15%"                 # joined user's avatar (top right, recorded at 578,247)
+          waitToSettleTimeoutMs: 500
+      - extendedWaitUntil:
+          visible: "FRND Safety Centre"
+          timeout: 4000
+          optional: true
+- assertVisible: "FRND Safety Centre"

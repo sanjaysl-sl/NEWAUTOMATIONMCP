@@ -1,0 +1,88 @@
+# Female host rights in a FRND Connect call: Report, Remove, Block (ban) the joined male user.
+# Recorded manually 6 Nov 2026 (recordings/04_female_flow, steps 50-107).
+#
+# NEEDS A SECOND USER: a male account must join the female's call (another phone or the
+# emulator running a male "Connect -> Random -> Audio Call"). Each action waits up to 3 min
+# for someone to be in the call.
+#
+# Run:  .\run.ps1 flows\female_host_rights.yaml -Device <serial> -Phone <female 78901 number>
+appId: com.dating.for.all.debug
+name: Female host rights - report, remove, block
+env:
+  GENDER: "Girl"
+tags:
+  - female
+  - host
+---
+- startRecording: female_host_rights
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+
+# Connect tab -> Go Online -> waits in an Audio Room for a FRND to join
+- tapOn:
+    text: "Connect"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: ".*Go Online.*"
+    timeout: 20000
+- tapOn:
+    text: ".*Go Online.*"
+    waitToSettleTimeoutMs: 500
+- takeScreenshot: host_0_waiting
+
+# --- Report ---
+- runFlow: subflows/host_open_safety_centre.yaml
+- tapOn:
+    text: "Report"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Report .*"
+    timeout: 10000
+- takeScreenshot: host_1_report_reasons
+- tapOn:                                   # first reason chip (reasons are in Hindi)
+    below: "to FRND Team"
+    above: "Submit"
+    index: 0
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    text: "Submit"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: ".*reported to FRND team.*"
+    timeout: 10000
+- takeScreenshot: host_2_reported
+
+# --- Remove (user leaves; wait for the next joiner) ---
+- runFlow: subflows/host_open_safety_centre.yaml
+- tapOn:
+    text: "Remove"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Are you sure you want to remove.*"
+    timeout: 10000
+- tapOn:
+    text: "Remove"
+    index: 1                               # the red Remove button, not the sheet title
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: ".*is removed from the room.*"
+    timeout: 10000
+- takeScreenshot: host_3_removed
+
+# --- Block (user is banned) ---
+- runFlow: subflows/host_open_safety_centre.yaml
+- tapOn:
+    text: "Block"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: "Are you sure you want to block.*"
+    timeout: 10000
+- tapOn:
+    text: "Block"
+    index: 1
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible: ".*(blocked|banned).*"
+    timeout: 15000
+- takeScreenshot: host_4_blocked
+- stopRecording

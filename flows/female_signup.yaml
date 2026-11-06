@@ -1,0 +1,18 @@
+# Female signup: Set Profile as "I am Girl" -> content language -> voice verification -> app language -> home.
+# Recorded manually 6 Nov 2026 (recordings/04_female_flow, steps 1-49).
+# Run:  .\run.ps1 flows\female_signup.yaml -Device <serial>
+appId: com.dating.for.all.debug
+name: Female signup reaches home
+env:
+  GENDER: "Girl"
+tags:
+  - female
+  - signup
+---
+- startRecording: female_signup
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+- assertVisible:
+    id: "homeTopBarRoot"
+- takeScreenshot: female_home
+- stopRecording

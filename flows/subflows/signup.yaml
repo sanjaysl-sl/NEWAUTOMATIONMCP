@@ -12,14 +12,15 @@ appId: com.dating.for.all.debug
     visible: "Perfect!"
     timeout: 15000
 - hideKeyboard
+- evalScript: "${output.gender = (typeof GENDER !== 'undefined' && GENDER) ? String(GENDER) : 'Boy'}"
 - tapOn:
     id: "genderSelector"
     waitToSettleTimeoutMs: 500
 - extendedWaitUntil:
-    visible: "I am Boy"
+    visible: "I am ${output.gender}"
     timeout: 10000
 - tapOn:
-    text: "I am Boy"
+    text: "I am ${output.gender}"
     waitToSettleTimeoutMs: 500
 - assertVisible:
     id: "selectedGenderText"
@@ -52,33 +53,56 @@ appId: com.dating.for.all.debug
 - tapOn:
     text: "Save"
     waitToSettleTimeoutMs: 500
-# --- Police declaration: tick the checkbox, then जमा करें (Submit) ---
-- extendedWaitUntil:
-    visible:
-      id: "checkBoxPoliceDeclaration"
-    timeout: 30000
-# The first tap can land before the screen is interactive - retry until the box is checked
-- repeat:
-    while:
-      notVisible:
-        id: "checkBoxPoliceDeclaration"
-        checked: true
-    times: 5
+# --- Boy: police declaration - tick the checkbox, then जमा करें (Submit) ---
+- runFlow:
+    when:
+      true: ${output.gender == 'Boy'}
     commands:
-      # The notification permission dialog pops up over this screen too
-      - runFlow: allow_notifications.yaml
-      - tapOn:
+      - extendedWaitUntil:
+          visible:
+            id: "checkBoxPoliceDeclaration"
+          timeout: 30000
+      # The first tap can land before the screen is interactive - retry until the box is checked
+      - repeat:
+          while:
+            notVisible:
+              id: "checkBoxPoliceDeclaration"
+              checked: true
+          times: 5
+          commands:
+            # The notification permission dialog pops up over this screen too
+            - runFlow: allow_notifications.yaml
+            - tapOn:
+                id: "checkBoxPoliceDeclaration"
+                waitToSettleTimeoutMs: 500
+                optional: true
+            - waitForAnimationToEnd:
+                timeout: 1500
+      - assertVisible:
           id: "checkBoxPoliceDeclaration"
+          checked: true
+      - tapOn:
+          id: "btnPoliceDeclaration"
           waitToSettleTimeoutMs: 500
-          optional: true
-      - waitForAnimationToEnd:
-          timeout: 1500
-- assertVisible:
-    id: "checkBoxPoliceDeclaration"
-    checked: true
-- tapOn:
-    id: "btnPoliceDeclaration"
-    waitToSettleTimeoutMs: 500
+
+# --- Girl: voice verification - hold the mic and read the sentence shown
+# ("कुछ कुछ होता है राहुल, तुम नहीं समझोगे"), then "गर्ल टेस्ट सफल" (girl test passed).
+# NOTE: the check listens to the phone mic - unattended runs may fail here unless QA
+# bypasses voice verification for test numbers.
+- runFlow:
+    when:
+      true: ${output.gender == 'Girl'}
+    commands:
+      - extendedWaitUntil:
+          visible: ".*वेरिफिकेशन.*"
+          timeout: 30000
+      - takeScreenshot: signup_voice_verification
+      - longPressOn:
+          point: "87%,86%"             # mic button (recorded at 626,1408 on 720x1640)
+      - extendedWaitUntil:
+          visible: ".*सफल.*"
+          timeout: 60000
+      - takeScreenshot: signup_voice_verified
 
 # --- App language: English ---
 - extendedWaitUntil:
