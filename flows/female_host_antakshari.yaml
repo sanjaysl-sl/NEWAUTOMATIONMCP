@@ -1,0 +1,59 @@
+# Female hosts an Antakshari room: Home -> Host Antakshari "Host now" -> room opens (Private Room 1/6)
+# -> End Call (Stay / End Call) -> Session Summary -> Close Room -> back on home.
+# Recorded manually 6 Nov 2026 (recordings/04_female_flow, steps 108-118).
+# Run:  .\run.ps1 flows\female_host_antakshari.yaml -Device <serial> -Phone <female 78901 number>
+appId: com.dating.for.all.debug
+name: Female hosts Antakshari room and closes it
+env:
+  GENDER: "Girl"
+tags:
+  - female
+  - host
+---
+- startRecording: female_host_antakshari
+- runFlow: subflows/select_qa_env.yaml
+- runFlow: subflows/login_or_signup.yaml
+
+# Home -> Host Antakshari card -> Host now
+- extendedWaitUntil:
+    visible: "(?i)host now"
+    timeout: 20000
+- takeScreenshot: antakshari_0_home
+- tapOn:
+    text: "(?i)host now"
+    waitToSettleTimeoutMs: 500
+- runFlow: subflows/allow_notifications.yaml       # mic permission if not pre-granted
+- extendedWaitUntil:
+    visible: "Antakshari Room"
+    timeout: 30000
+- assertVisible: ".*Private Room.*"
+- takeScreenshot: antakshari_1_room
+
+# End the call: back -> "Are you sure you want to end call?" -> End Call
+- repeat:
+    while:
+      notVisible: "End Call"
+    times: 3
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: antakshari_2_end_confirm
+- tapOn:
+    text: "End Call"
+    waitToSettleTimeoutMs: 500
+
+# Session summary -> Close Room
+- extendedWaitUntil:
+    visible: "Session Summary"
+    timeout: 15000
+- assertVisible: "Total Duration"
+- takeScreenshot: antakshari_3_summary
+- tapOn:
+    text: "Close Room"
+    waitToSettleTimeoutMs: 500
+- extendedWaitUntil:
+    visible:
+      id: "homeTopBarRoot"
+    timeout: 15000
+- stopRecording
